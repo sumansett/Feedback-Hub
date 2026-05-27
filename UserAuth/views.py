@@ -9,7 +9,7 @@ import random
 import re
 from django.utils import timezone
 from datetime import timedelta
-
+import resend
 
 def register(request):
 
@@ -85,6 +85,26 @@ def Logout(request):
     messages.success(request, 'Logout successful')
     return redirect('login')
 
+def send_otp_email_resend(to_email, otp):
+    resend.api_key = settings.RESEND_API_KEY
+
+    params = {
+        "from": f"Feedback Hub <{settings.RESEND_FROM_EMAIL}>",
+        "to": [to_email],
+        "subject": "Your OTP for Password Reset",
+        "html": f"""
+            <div style="font-family: Arial, sans-serif; line-height: 1.6;">
+                <h2>Password Reset OTP</h2>
+                <p>Your OTP for password reset is:</p>
+                <h1 style="letter-spacing: 4px;">{otp}</h1>
+                <p>This OTP is valid for 10 minutes.</p>
+                <p>If you did not request this password reset, please ignore this email.</p>
+            </div>
+        """,
+    }
+
+    return resend.Emails.send(params)
+
 def ForgetPassword(request):
 
     # SEND OTP
@@ -125,20 +145,13 @@ def ForgetPassword(request):
         
         # Send OTP email first
         try:
-            send_mail(
-                "Your OTP for Password Reset",
-                f"Your OTP for password reset is {otp}. It is valid for 10 minutes.",
-                settings.EMAIL_HOST_USER,
-                [user.email],
-                fail_silently=False,
-            )
-        
+            send_otp_email_resend(user.email, otp)
+
         except Exception as e:
-            import traceback
-            traceback.print_exc()
-            print("OTP EMAIL ERROR:", repr(e))
+            print("RESEND OTP EMAIL ERROR:", repr(e))
             messages.error(request, "OTP could not be sent. Please try again later.")
             return redirect("forget-password")
+
         
         # Save OTP only after email sent successfully
         OtpModel.objects.filter(user=user).delete()
@@ -212,19 +225,13 @@ def ForgetPassword(request):
         )
 
         try:
-            send_mail(
-                'Your OTP for Password Reset',
-                f'Your OTP for password reset is {otp}. It is valid for 10 minutes.',
-                settings.DEFAULT_FROM_EMAIL,
-                [user.email],
-                fail_silently=False,
-            )
+           send_otp_email_resend(user.email, otp)
 
         except Exception as e:
-            print("RESEND OTP EMAIL ERROR:", e)
-            messages.error(request, 'OTP could not be resent. Please try again later.')
-            return render(request, 'submitotp.html', {
-                'username': user.username
+            print("RESEND OTP EMAIL ERROR:", repr(e))
+            messages.error(request, "OTP could not be resent. Please try again later.")
+            return render(request, "submitotp.html", {
+                "username": user.username
             })
 
         messages.success(request, 'New OTP has been sent to your registered email.')
