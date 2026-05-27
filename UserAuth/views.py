@@ -134,7 +134,9 @@ def ForgetPassword(request):
             )
         
         except Exception as e:
-            print("OTP EMAIL ERROR:", str(e))
+            import traceback
+            traceback.print_exc()
+            print("OTP EMAIL ERROR:", repr(e))
             messages.error(request, "OTP could not be sent. Please try again later.")
             return redirect("forget-password")
         
