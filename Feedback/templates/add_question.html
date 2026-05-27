@@ -1,0 +1,165 @@
+{% extends "base.html" %}
+{% block title %}Add Question | Feedback Hub{% endblock title %}
+{% block content %}
+
+<div class="min-h-screen bg-slate-100 py-10 px-4">
+
+    <div class="max-w-3xl mx-auto">
+
+        <!-- Header -->
+        <div class="bg-white rounded-3xl shadow p-8 mb-6">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+
+                <div>
+                    <h1 class="text-3xl font-bold text-slate-900">
+                        Manage Questions
+                    </h1>
+
+                    <p class="text-slate-600 mt-2">
+                        Form: <span class="font-semibold">{{ feedback_form.title }}</span>
+                    </p>
+
+                    <p class="text-sm text-slate-500 mt-1">
+                        Add, update, or delete questions
+                    </p>
+                </div>
+
+                <a href="{% url 'host_dashboard' %}"
+                    class="inline-flex items-center justify-center px-5 py-3 bg-slate-200 hover:bg-slate-300 text-slate-800 font-semibold rounded-2xl transition">
+                    Back to Dashboard
+                </a>
+
+            </div>
+        </div>
+
+        <!-- Add Question Form -->
+        <div class="bg-white rounded-3xl shadow p-8 mb-6">
+
+            <form method="POST" class="space-y-6">
+                {% csrf_token %}
+
+                <!-- Question Text -->
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-2">
+                        Add Question
+                    </label>
+
+                    <input type="text" name="question_text" required placeholder="Example: How was the event?"
+                        class="w-full px-5 py-4 bg-slate-50 border border-slate-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900">
+                </div>
+
+                <!-- Field Type -->
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-2">
+                        Field Type
+                    </label>
+
+                    <select name="field_type" id="fieldType" required 
+                        class="w-full px-5 py-4 bg-slate-50 border border-slate-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900">
+
+                        <option value="text">Short Text</option>
+                        <option value="textarea">Long Text</option>
+                        <option value="number">Number</option>
+                        <option value="rating">Rating (1-5)</option>
+                        <option value="radio">Radio Button (Yes/No)</option>
+                        <option value="select">Dropdown (Strongly Disagree/Disagree/Neutral/Agree/Strongly Agree)</option>
+
+                    </select>
+
+                <!-- Required -->
+                <div class="flex items-center gap-3 mt-6">
+                    <input type="checkbox" name="required" checked class="w-5 h-5">
+
+                    <label class="text-slate-700">
+                        Required question
+                    </label>
+                </div>
+
+                <!-- Buttons -->
+                <div class="flex flex-col sm:flex-row gap-4 mb-6 pt-4">
+
+                    <button type="submit"
+                        class="w-full sm:w-auto px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-2xl transition">
+                        Add Question
+                    </button>
+
+                    <a href="{% url 'host_dashboard' %}"
+                        class="w-full sm:w-auto px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-2xl text-center transition">
+                        Finish
+                    </a>
+
+                </div>
+
+            </form>
+
+        </div>
+
+        <!-- Existing Questions -->
+        <div class="bg-white rounded-3xl shadow p-8">
+
+            <h2 class="text-xl font-bold text-slate-900 mb-4">
+                Added Questions
+            </h2>
+
+            {% if questions %}
+
+            <div class="space-y-4">
+
+                {% for question in questions %}
+                <div class="border border-slate-200 rounded-2xl p-4 bg-slate-50">
+
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+
+                        <!-- Question Info -->
+                        <div>
+                            <h3 class="font-semibold text-slate-900">
+                                {{ forloop.counter }}. {{ question.question_text }}
+                            </h3>
+
+                            <p class="text-sm text-slate-500 mt-1">
+                                Type: {{ question.field_type }} |
+                                Required:
+                                {% if question.required %}
+                                Yes
+                                {% else %}
+                                No
+                                {% endif %}
+                            </p>
+                        </div>
+
+                        <!-- Edit/Delete Buttons -->
+                        <div class="flex gap-2">
+
+                            <a href="{% url 'edit_question' question.id %}"
+                                class="px-4 py-2 border border-yellow-700 bg-yellow-100 text-yellow-700 rounded-xl text-sm font-semibold hover:bg-yellow-200 transition">
+                                Edit
+                            </a>
+
+                            <a href="{% url 'delete_question' question.id %}"
+                                onclick="return confirm('Are you sure you want to delete this question?');"
+                                class="px-4 py-2 bg-red-100 border border-red-700 text-red-700 rounded-xl text-sm font-semibold hover:bg-red-200 transition">
+                                Delete
+                            </a>
+
+                        </div>
+
+                    </div>
+
+                </div>
+                {% endfor %}
+
+            </div>
+
+            {% else %}
+
+            <p class="text-slate-500">
+                No questions added yet.
+            </p>
+
+            {% endif %}
+
+        </div>
+    </div>
+
+</div>
+{% endblock content %}

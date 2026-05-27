@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+{% block title %}Responses | Feedback Hub{% endblock title %}
+{% block content %}
+
+<div class="min-h-screen bg-slate-100 py-10 px-4">
+
+    <div class="max-w-6xl mx-auto">
+
+        <!-- Header -->
+        <div class="bg-white rounded-3xl shadow p-8 mb-6">
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+
+                <div>
+                    <h1 class="text-3xl font-bold text-slate-900">
+                        Responses
+                    </h1>
+
+                    <p class="text-slate-600 mt-2">
+                        Form: <span class="font-semibold">{{ feedback_form.title }}</span>
+                    </p>
+
+                    <p class="text-sm text-slate-500 mt-1">
+                        Total Responses: {{ responses.count }}
+                    </p>
+                </div>
+
+                <div class="flex flex-wrap gap-3">
+
+                    <a href="{% url 'host_dashboard' %}"
+                       class="px-5 py-3 bg-slate-200 hover:bg-slate-300 text-slate-800 rounded-xl font-semibold transition">
+                        Back to Dashboard
+                    </a>
+
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Responses List -->
+        {% if responses %}
+
+            <div class="space-y-6">
+
+                {% for response in responses %}
+
+                    <div class="bg-white rounded-3xl shadow p-8">
+
+                        <!-- User Info -->
+                        <div class="border-b border-slate-200 pb-4 mb-5">
+
+                            <h2 class="text-xl font-bold text-slate-900">
+                                Response #{{ forloop.counter }}
+                            </h2>
+
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4 text-sm">
+
+                                <div>
+                                    <p class="text-slate-500">Name</p>
+                                    <p class="font-semibold text-slate-800">
+                                        {% if response.name %}
+                                            {{ response.name }}
+                                        {% else %}
+                                            Anonymous
+                                        {% endif %}
+                                    </p>
+                                </div>
+
+                                <div>
+                                    <p class="text-slate-500">Email</p>
+                                    <p class="font-semibold text-slate-800">
+                                        {% if response.email %}
+                                            {{ response.email }}
+                                        {% else %}
+                                            Not provided
+                                        {% endif %}
+                                    </p>
+                                </div>
+
+                                <div>
+                                    <p class="text-slate-500">Submitted At</p>
+                                    <p class="font-semibold text-slate-800">
+                                        {{ response.submitted_at|date:"d M Y, h:i A" }}
+                                    </p>
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                        <!-- Answers -->
+                        <div class="space-y-4">
+
+                            {% for answer in response.answers.all %}
+
+                                <div class="bg-slate-50 border border-slate-200 rounded-2xl p-5">
+
+                                    <p class="text-sm font-semibold text-slate-600">
+                                        {{ answer.question.question_text }}
+                                    </p>
+
+                                    <p class="text-slate-900 mt-2">
+                                        {{ answer.answer_text }}
+                                    </p>
+
+                                </div>
+
+                            {% endfor %}
+
+                        </div>
+
+                    </div>
+
+                {% endfor %}
+
+            </div>
+
+        {% else %}
+
+            <div class="bg-white rounded-3xl shadow p-10 text-center">
+
+                <h2 class="text-2xl font-bold text-slate-900">
+                    No responses yet
+                </h2>
+
+                <p class="text-slate-600 mt-2">
+                    Share your public form link to start collecting feedback.
+                </p>
+
+                <a href="{% url 'public_form' feedback_form.slug %}"
+                   target="_blank"
+                   class="inline-block mt-6 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold transition">
+                    Open Public Form
+                </a>
+
+            </div>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+{% endblock content %}

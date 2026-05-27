@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+{% block title %}Edit Question | Feedback Hub{% endblock title %}
+{% block content %}
+
+<div class="min-h-screen bg-slate-100 py-10 px-4">
+
+    <div class="max-w-2xl mx-auto bg-white rounded-3xl shadow-xl p-8">
+
+        <div class="mb-8 text-center">
+            <h1 class="text-3xl font-bold text-slate-900">
+                Edit Question
+            </h1>
+            <p class="text-slate-600 mt-2">
+                Update this question and save changes.
+            </p>
+        </div>
+
+        <form method="POST" class="space-y-6">
+            {% csrf_token %}
+
+            <!-- Question Text -->
+            <div>
+                <label class="block text-sm font-medium text-slate-700 mb-2">
+                    Question
+                </label>
+
+                <input 
+                    type="text"
+                    name="question_text"
+                    value="{{ question.question_text }}"
+                    required
+                    class="w-full px-5 py-4 bg-slate-50 border border-slate-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900"
+                >
+            </div>
+
+            <!-- Field Type -->
+            <div>
+                <label class="block text-sm font-medium text-slate-700 mb-2">
+                    Field Type
+                </label>
+
+                <select 
+                    name="field_type"
+                    required
+                    class="w-full px-5 py-4 bg-slate-50 border border-slate-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900">
+
+                    <option value="text" {% if question.field_type == "text" %}selected{% endif %}>
+                        Short Text
+                    </option>
+
+                    <option value="textarea" {% if question.field_type == "textarea" %}selected{% endif %}>
+                        Long Text
+                    </option>
+
+                    <option value="number" {% if question.field_type == "number" %}selected{% endif %}>
+                        Number
+                    </option>
+
+                    <option value="rating" {% if question.field_type == "rating" %}selected{% endif %}>
+                        Rating (1-5)
+                    </option>
+
+                    <option value="radio" {% if question.field_type == "radio" %}selected{% endif %}>
+                        Radio Button (Yes/No)
+                    </option>
+
+                    <option value="select" {% if question.field_type == "select" %}selected{% endif %}>
+                        Dropdown (Strongly Disagree/Disagree/Neutral/Agree/Strongly Agree)
+                    </option>
+
+                </select>
+            </div>
+
+            <!-- Required -->
+            <div class="flex items-center gap-3">
+                <input 
+                    type="checkbox"
+                    name="required"
+                    {% if question.required %}checked{% endif %}
+                    class="w-5 h-5"
+                >
+
+                <label class="text-slate-700">
+                    Required question
+                </label>
+            </div>
+
+            <!-- Buttons -->
+            <div class="flex flex-col sm:flex-row gap-4 pt-4">
+
+                <button 
+                    type="submit"
+                    class="w-full sm:w-auto px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-2xl transition">
+                    Update Question
+                </button>
+
+                <a href="{% url 'add_question' question.form.id %}"
+                   class="w-full sm:w-auto px-6 py-3 bg-slate-200 hover:bg-slate-300 text-slate-800 font-semibold rounded-2xl text-center transition">
+                    Cancel
+                </a>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+{% endblock content %}

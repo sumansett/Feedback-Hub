@@ -1,0 +1,181 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard | Feedback Hub{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-slate-100 py-10 px-4">
+
+    <div class="max-w-6xl mx-auto">
+
+        <!-- Header -->
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
+            <div>
+                <h1 class="text-3xl font-bold text-slate-900">
+                    Host Dashboard
+                </h1>
+                <p class="text-slate-600 mt-1">
+                    Manage your feedback forms and view responses.
+                </p>
+            </div>
+
+            <a href="{% url 'create_form' %}"
+                class="inline-flex items-center justify-center px-5 py-3 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 transition">
+                + Create New Form
+            </a>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8">
+
+            <div class="bg-white rounded-2xl shadow p-6">
+                <p class="text-slate-500 text-sm">Total Forms</p>
+                <h2 class="text-3xl font-bold text-slate-900 mt-2">
+                    {{ total_forms }}
+                </h2>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow p-6">
+                <p class="text-slate-500 text-sm">Total Responses</p>
+                <h2 class="text-3xl font-bold text-slate-900 mt-2">
+                    {{ total_responses }}
+                </h2>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow p-6">
+                <p class="text-slate-500 text-sm">Logged in as</p>
+                <h2 class="text-xl font-semibold text-slate-900 mt-2">
+                    {{ request.user.username }}
+                </h2>
+            </div>
+
+        </div>
+
+        <!-- Forms List -->
+        <div class="bg-white rounded-2xl shadow overflow-hidden">
+
+            <div class="p-6 border-b border-slate-200">
+                <h2 class="text-xl font-semibold text-slate-900">
+                    My Feedback Forms
+                </h2>
+            </div>
+
+            {% if forms %}
+
+            <div class="overflow-x-auto">
+                <table class="w-full text-left">
+                    <thead class="bg-slate-50 border-b border-slate-200">
+                        <tr>
+                            <th class="px-6 py-4 text-sm font-semibold text-slate-600">
+                                Form Title
+                            </th>
+                            <th class="px-8 py-4 text-sm font-semibold text-slate-600">
+                                Created At
+                            </th>
+                            <th class="px-24 py-4 text-sm font-semibold text-slate-600">
+                                Public Link
+                            </th>
+                            <th class="px-44 py-4 text-sm font-semibold text-slate-600">
+                                Actions
+                            </th>
+                        </tr>
+                    </thead>
+
+                    <tbody class="divide-y divide-slate-200">
+
+                        {% for form in forms %}
+                        <tr class="hover:bg-slate-50 transition">
+
+                            <td class="px-6 py-4">
+                                <h3 class="font-semibold text-slate-900">
+                                    {{ form.title }}
+                                </h3>
+                                <p class="text-sm text-slate-500">
+                                    {{ form.description|truncatewords:12 }}
+                                </p>
+                            </td>
+
+                            <td class="px-6 py-4 text-sm text-slate-600">
+                                {{ form.created_at|date:"d M Y" }}
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="flex flex-col items-center gap-2">
+
+                                    <a href="{% url 'public_form' form.slug %}" target="_blank"
+                                        class="w-36 text-center px-4 py-2 bg-blue-100 text-blue-700 rounded-lg text-sm font-medium hover:bg-blue-200 transition">
+                                        Open Form
+                                    </a>
+
+                                    <button type="button"
+                                        onclick="copyFormLink('{{ request.scheme }}://{{ request.get_host }}{% url 'public_form' form.slug %}')"
+                                        class="w-36 text-center px-4 py-2 bg-blue-100 text-blue-700 rounded-lg text-sm font-medium hover:bg-blue-200 transition">
+                                        Copy Link
+                                    </button>
+
+                                </div>
+                            </td>
+
+                            <td class="px-6 py-4">
+                                <div class="flex flex-wrap gap-2">
+
+                                    <a href="{% url 'add_question' form.id %}"
+                                        class="px-3 py-2 bg-green-100 text-green-700 rounded-lg text-sm font-medium hover:bg-green-200">
+                                        Manage Questions
+                                    </a>
+
+                                    <a href="{% url 'view_responses' form.id %}"
+                                        class="px-3 py-2 bg-purple-100 text-purple-700 rounded-lg text-sm font-medium hover:bg-purple-200">
+                                        View Responses
+                                    </a>
+
+                                    <a href="{% url 'form_analytics' form.id %}"
+                                        class="px-3 py-2 bg-yellow-100 text-yellow-700 rounded-lg text-sm font-medium hover:bg-yellow-200">
+                                        Analytics
+                                    </a>
+
+                                </div>
+                            </td>
+
+                        </tr>
+                        {% endfor %}
+
+                    </tbody>
+                </table>
+            </div>
+
+            {% else %}
+
+            <div class="p-10 text-center">
+                <h3 class="text-xl font-semibold text-slate-800">
+                    No feedback forms yet
+                </h3>
+
+                <p class="text-slate-500 mt-2">
+                    Create your first form and start collecting feedback.
+                </p>
+
+                <a href="{% url 'create_form' %}"
+                    class="inline-block mt-5 px-5 py-3 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition">
+                    Create Form
+                </a>
+            </div>
+
+            {% endif %}
+
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+    function copyFormLink(link) {
+        navigator.clipboard.writeText(link)
+            .then(() => {
+                alert("Form link copied to clipboard!");
+            })
+            .catch(() => {
+                alert("Could not copy link. Please open the form and copy from browser.");
+            });
+    }
+</script>
+{% endblock content %}
