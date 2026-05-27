@@ -122,32 +122,33 @@ def ForgetPassword(request):
 
         # Generate OTP
         otp = random.randint(1000, 9999)
-
-        # Save OTP
-        OtpModel.objects.create(
-            user=user,
-            otp=otp,
-            created_at=timezone.now()
-        )
-
-        # Send OTP email safely
+        
+        # Send OTP email first
         try:
             send_mail(
-                'Your OTP for Password Reset',
-                f'Your OTP for password reset is {otp}. It is valid for 10 minutes.',
-                settings.DEFAULT_FROM_EMAIL,
+                "Your OTP for Password Reset",
+                f"Your OTP for password reset is {otp}. It is valid for 10 minutes.",
+                settings.EMAIL_HOST_USER,
                 [user.email],
                 fail_silently=False,
             )
-
+        
         except Exception as e:
-            print("OTP EMAIL ERROR:", e)
-            messages.error(request, 'OTP could not be sent. Please try again later.')
-            return redirect('forget-password')
-
-        messages.success(request, 'OTP has been sent to your registered email.')
-        return render(request, 'submitotp.html', {
-            'username': user.username
+            print("OTP EMAIL ERROR:", str(e))
+            messages.error(request, "OTP could not be sent. Please try again later.")
+            return redirect("forget-password")
+        
+        # Save OTP only after email sent successfully
+        OtpModel.objects.filter(user=user).delete()
+        
+        OtpModel.objects.create(
+            user=user,
+            otp=otp
+        )
+        
+        messages.success(request, "OTP has been sent to your registered email.")
+        return render(request, "submitotp.html", {
+            "username": user.username
         })
 
 
